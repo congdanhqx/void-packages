@@ -1,4 +1,4 @@
-# Template file for 'opentoonz'
+# Template file for 'opentoonz'.
 pkgname=opentoonz
 version=1.4.0
 revision=1
