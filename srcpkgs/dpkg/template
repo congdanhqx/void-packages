@@ -1,14 +1,14 @@
 # Template file for 'dpkg'
 pkgname=dpkg
 version=1.20.5
-revision=2
+revision=3
 build_style=gnu-configure
 configure_args="--disable-start-stop-daemon --with-libz --with-libbz2
  --with-liblzma"
 hostmakedepends="pkg-config perl tar"
 makedepends="zlib-devel bzip2-devel liblzma-devel ncurses-devel"
 depends="perl"
-checkdepends="gnupg perl-Test-Pod"
+checkdepends="gnupg2 perl-Test-Pod"
 short_desc="Debian Package Manager"
 maintainer="Orphaned <orphan@voidlinux.org>"
 license="GPL-2.0-or-later"
