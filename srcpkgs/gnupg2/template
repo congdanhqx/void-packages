@@ -1,10 +1,10 @@
 # Template file for 'gnupg2'
 pkgname=gnupg2
 version=2.2.27
-revision=1
+revision=2
 wrksrc="gnupg-${version}"
 build_style=gnu-configure
-configure_args="--enable-gpg-is-gpg2 $(vopt_enable ldap)
+configure_args="$(vopt_enable ldap)
  --with-libgcrypt-prefix=${XBPS_CROSS_BASE}/usr
  --with-libassuan-prefix=${XBPS_CROSS_BASE}/usr
  --with-ksba-prefix=${XBPS_CROSS_BASE}/usr
@@ -21,6 +21,7 @@ distfiles="https://gnupg.org/ftp/gcrypt/gnupg/gnupg-${version}.tar.bz2"
 checksum=34e60009014ea16402069136e0a5f63d9b65f90096244975db5cea74b3d02399
 build_options="ldap"
 build_options_default="ldap"
+conflicts="gnupg<=1.4.23_3"
 
 post_patch() {
 	# On at least aarch64, configure sets this even though it doesn't exist
@@ -29,13 +30,12 @@ post_patch() {
 }
 
 post_install() {
-	# remove conflicts with gnupg 1.
-	mv ${DESTDIR}/usr/share/man/man7/gnupg.7 ${DESTDIR}/usr/share/man/man7/gnupg2.7
-
 	vmkdir usr/share/examples
 	mv ${DESTDIR}/usr/share/doc/gnupg/examples ${DESTDIR}/usr/share/examples/gnupg2
 
 	mv ${DESTDIR}/usr/share/doc/gnupg ${DESTDIR}/usr/share/doc/gnupg2
+
+	ln -s gpg $DESTDIR/usr/bin/gpg2
 }
 
 gnupg2-scdaemon_package() {
