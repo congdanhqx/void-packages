@@ -2,9 +2,9 @@
 pkgname=notmuch
 version=0.31.3
 revision=1
-hostmakedepends="perl pkg-config python3-Sphinx python3-devel texinfo"
+hostmakedepends="perl pkg-config python3-Sphinx python3-devel texinfo gnupg2"
 makedepends="bash-completion gmime3-devel talloc-devel xapian-core-devel
- python3-cffi python3-setuptools gnupg2"
+ python3-cffi python3-setuptools"
 depends="gmime3>=3.2.7"
 checkdepends="python3-pytest mdocml dtach gdb tar xz"
 short_desc="Thread-based email index, search, and tagging"
@@ -47,9 +47,6 @@ do_build() {
 }
 
 do_check() {
-	mkdir -p fake-bin
-	ln -sf /usr/bin/gpg2 fake-bin/gpg
-	PATH=$PWD/fake-bin:$PATH
 	cp $XBPS_SRCDISTDIR/notmuch-$version/database-v1.tar.xz \
 		test/test-databases
 	case "$XBPS_TARGET_LIBC" in
