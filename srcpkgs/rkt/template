@@ -1,13 +1,13 @@
 # Template file for 'rkt'
 pkgname=rkt
 version=1.30.0
-revision=2
+revision=3
 build_style=gnu-configure
 # KVM support broken
 configure_args="--enable-tpm=no --enable-sdjournal=no
  --with-stage1-flavors=fly,coreos,host
  --with-stage1-default-location=/usr/lib/rkt/stage1.aci"
-hostmakedepends="automake wget cpio squashfs-tools bc gnupg git go"
+hostmakedepends="automake wget cpio squashfs-tools bc gnupg2 git go"
 makedepends="acl-devel zlib-devel libressl-devel"
 depends="virtual?rkt-stage1"
 short_desc="App Container runtime for Linux"
