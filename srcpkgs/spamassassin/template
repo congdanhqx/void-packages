@@ -1,12 +1,12 @@
 # Template file for 'spamassassin'
 pkgname=spamassassin
 version=3.4.4
-revision=2
+revision=3
 wrksrc="Mail-SpamAssassin-${version}"
 build_style=perl-module
 # Missing optional dependencies:
 #  Mail::SPF, Geo::IP, Razor2, Encode::Detect, Net::Patricia
-hostmakedepends="curl gnupg perl perl-DBI perl-Digest-SHA1 perl-HTML-Parser
+hostmakedepends="curl gnupg2 perl perl-DBI perl-Digest-SHA1 perl-HTML-Parser
  perl-HTTP-Date perl-IO-Socket-INET6 perl-IO-Socket-SSL perl-LWP
  perl-Mail-DKIM perl-Net-DNS perl-NetAddr-IP"
 makedepends="$hostmakedepends"
