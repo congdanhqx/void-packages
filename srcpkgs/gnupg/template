@@ -1,7 +1,7 @@
 # Template file for 'gnupg'
 pkgname=gnupg
 version=1.4.23
-revision=3
+revision=4
 build_style=gnu-configure
 configure_args="--enable-threads=posix --enable-noexecstack gnupg_cv_regex_broken=no"
 makedepends="bzip2-devel zlib-devel libldap-devel libcurl-devel readline-devel libusb-compat-devel"
@@ -21,4 +21,10 @@ post_extract() {
 }
 post_install() {
 	rm ${DESTDIR}/usr/bin/gpgsplit
+	mv ${DESTDIR}/usr/bin/gpg ${DESTDIR}/usr/bin/gpg1
+	mv ${DESTDIR}/usr/bin/gpgv ${DESTDIR}/usr/bin/gpgv1
+	mv ${DESTDIR}/usr/share/man/man1/gpg.1 \
+		${DESTDIR}/usr/share/man/man1/gpg1.1
+	mv ${DESTDIR}/usr/share/man/man1/gpgv.1 \
+		${DESTDIR}/usr/share/man/man1/gpgv1.1
 }
