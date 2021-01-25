@@ -1,16 +1,16 @@
 # Template file for 'libcryptui'
 pkgname=libcryptui
 version=3.12.2
-revision=3
+revision=4
 build_style=gnu-configure
 build_helper="gir"
 configure_args="--disable-static --disable-update-mime-database
  --disable-schemas-compile $(vopt_enable gir introspection)"
-hostmakedepends="pkg-config intltool dbus-glib-devel glib gnupg
+hostmakedepends="pkg-config intltool dbus-glib-devel glib gnupg2
  $(vopt_if gir gobject-introspection)"
 makedepends="libSM-devel dbus-glib-devel gtk+3-devel gpgme-devel
  libnotify-devel libgnome-keyring-devel"
-depends="hicolor-icon-theme libgnome-keyring>=3.10 gnupg"
+depends="hicolor-icon-theme libgnome-keyring>=3.10 gnupg2"
 short_desc="GNOME Interface components for OpenPGP"
 maintainer="Orphaned <orphan@voidlinux.org>"
 license="GPL-2.0-or-later, LGPL-2.0-or-later"
