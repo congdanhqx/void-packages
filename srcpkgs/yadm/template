@@ -1,8 +1,8 @@
 # Template file for 'yadm'
 pkgname=yadm
 version=3.0.2
-revision=1
-depends="bash git gnupg"
+revision=2
+depends="bash git gnupg2"
 short_desc="Yet Another Dotfiles Manager"
 maintainer="John <me@johnnynator.dev>"
 license="GPL-3.0-or-later"
