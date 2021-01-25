@@ -1,10 +1,10 @@
 # Template file for 'git-secret'
 pkgname=git-secret
 version=0.3.3
-revision=1
+revision=2
 build_style=gnu-makefile
 make_install_args="PREFIX=/usr"
-depends="bash gawk gnupg coreutils"
+depends="bash gawk gnupg2 coreutils"
 short_desc="Bash-tool to store your private data inside a git repository"
 maintainer="shizonic <realtiaz@gmail.com>"
 license="MIT"
