@@ -1,12 +1,12 @@
 # Template file for 'seahorse-sharing'
 pkgname=seahorse-sharing
 version=3.8.0
-revision=4
+revision=5
 build_style=gnu-configure
-hostmakedepends="pkg-config intltool gnupg"
+hostmakedepends="pkg-config intltool gnupg2"
 makedepends="libsoup-devel gettext-devel glib-devel gpgme-devel gtk+3-devel
  avahi-glib-libs-devel libSM-devel"
-depends="gnupg"
+depends="gnupg2"
 short_desc="Sharing of PGP public keys via DNS-SD and HKP"
 maintainer="Orphaned <orphan@voidlinux.org>"
 license="GPL-2.0-or-later"
