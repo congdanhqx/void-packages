@@ -1,12 +1,12 @@
 # Template file for 'rdup'
 pkgname=rdup
 version=1.1.15
-revision=4
+revision=5
 build_style=gnu-configure
 hostmakedepends="automake pkg-config"
 makedepends="glib-devel libarchive-devel nettle-devel"
 depends="bash"
-checkdepends="dejagnu tar gnupg"
+checkdepends="dejagnu tar gnupg2"
 short_desc="Backup program that doesn't make backups"
 maintainer="Rui Abreu Ferreira <raf-ep@gmx.com>"
 license="GPL-3.0-or-later"
