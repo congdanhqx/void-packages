@@ -1,0 +1,34 @@
+# Template file for 'fluent-bit'
+pkgname=fluent-bit
+version=1.7.1
+revision=1
+build_style=cmake
+configure_args="-DCMAKE_BUILD_TYPE=None -DFLB_USE_SYSTEM_LIBRARIES=ON
+ -DCMAKE_INSTALL_SYSCONFDIR=/etc
+ -DFLB_RELEASE=On -DFLB_DEBUG=Off -DFLB_TRACE=Off -DFLB_JEMALLOC=On
+ -DFLB_TLS=On -DFLB_HTTP_SERVER=On -DFLB_OUT_KAFKA=On -DFLB_OUT_NATS=On"
+hostmakedepends="pkg-config flex bison"
+makedepends="jemalloc-devel onigmo-devel mbedtls-devel sqlite-devel
+ LuaJIT-devel jansson-devel msgpack-devel libavro-devel xxHash-devel"
+short_desc="Fluent Bit is an open source Log Processor and Forwarder"
+maintainer="Simon Adameit <simon@simonadameit.com>"
+license="Apache-2.0"
+homepage="https://fluentbit.io/"
+distfiles="https://fluentbit.io/releases/${version%.*}/fluent-bit-${version}.tar.gz"
+checksum=2a870d8b2f3455b83e4660f677c83a9403b75b148c7c33b1b198c63f555e4c16
+
+# CMakeFiles want -D__FILENAME__=$(subst ...)
+# https://docs.fluentbit.io/manual/installation/sources/build-and-install
+export CMAKE_GENERATOR='Unix Makefiles'
+make_cmd=make
+if [ "$XBPS_TARGET_LIBC" = musl ]; then
+	makedepends+=" musl-fts-devel"
+	configure_args+=" -DCMAKE_C_STANDARD_LIBRARIES=-lfts"
+	# Set the default coroutine stack size to the same value as on glibc.
+	# This avoids running into a > getpagesize() check.
+	configure_args+=" -DFLB_CORO_STACK_SIZE=24576"
+fi
+
+post_install() {
+	rm -rf $DESTDIR/usr/include
+}

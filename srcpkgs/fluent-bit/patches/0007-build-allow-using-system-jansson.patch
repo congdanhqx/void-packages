@@ -1,0 +1,108 @@
+From 519c46a7cbe4ac1e790f63a4fc763cf7bed0acc6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sat, 27 Feb 2021 11:39:10 +0700
+Subject: [PATCH 07/10] build: allow using system jansson
+
+---
+ CMakeLists.txt          | 15 ++++++++++-----
+ lib/avro/CMakeLists.txt | 30 +++++++++++++++++-------------
+ src/CMakeLists.txt      |  9 ++++-----
+ 3 files changed, 31 insertions(+), 23 deletions(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index 999591cf..c920e108 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -363,13 +363,18 @@ add_subdirectory(${FLB_PATH_LIB_MPACK} EXCLUDE_FROM_ALL)
+ add_subdirectory(${FLB_PATH_LIB_MINIZ} EXCLUDE_FROM_ALL)
+ 
+ # Avro
++FLB_OPTION_SYSTEM_LIB(jansson)
+ if(FLB_AVRO_ENCODER)
+   # jansson
+-  option(JANSSON_BUILD_DOCS         OFF)
+-  option(JANSSON_EXAMPLES           OFF)
+-  option(JANSSON_WITHOUT_TESTS       ON)
+-  option(JANSSON_BUILD_SHARED_LIBS  OFF)
+-  add_subdirectory(${FLB_PATH_LIB_JANSSON})
++  if(FLB_USE_SYSTEM_jansson)
++    FLB_FORCE_PKG_CONFIG_LIB(jansson)
++  else()
++    option(JANSSON_BUILD_DOCS         OFF)
++    option(JANSSON_EXAMPLES           OFF)
++    option(JANSSON_WITHOUT_TESTS       ON)
++    option(JANSSON_BUILD_SHARED_LIBS  OFF)
++    add_subdirectory(${FLB_PATH_LIB_JANSSON})
++  endif()
+ 
+   #avro
+   add_subdirectory(${FLB_PATH_LIB_AVRO} EXCLUDE_FROM_ALL)
+diff --git lib/avro/CMakeLists.txt lib/avro/CMakeLists.txt
+index 344a3fae..19d30b4e 100644
+--- lib/avro/CMakeLists.txt
++++ lib/avro/CMakeLists.txt
+@@ -178,26 +178,30 @@ endif (LZMA_FOUND)
+ set(CODEC_LIBRARIES ${ZLIB_LIBRARIES} ${LZMA_LIBRARIES} ${SNAPPY_LIBRARIES})
+ set(CODEC_PKG "@ZLIB_PKG@ @LZMA_PKG@ @SNAPPY_PKG@")
+ 
+-# commented out by mcqueen because jansson is now embedded here 07OCT2020
+ # Jansson JSON library
+-#pkg_check_modules(JANSSON jansson>=2.3)
+-#if (JANSSON_FOUND)
+-    #set(JANSSON_PKG libjansson)
+-    #include_directories(${JANSSON_INCLUDE_DIRS})
+-    #link_directories(${JANSSON_LIBRARY_DIRS})
+-#else (JANSSON_FOUND)
+-    #message(FATAL_ERROR "libjansson >=2.3 not found")
+-#endif (JANSSON_FOUND)
+-# added by mcqueen to get the headers into the fluent-bit build root 07OCT2020
+-include_directories(${CMAKE_BINARY_DIR}/lib/jansson/include/)
++if(FLB_USE_SYSTEM_jansson)
++  pkg_check_modules(JANSSON jansson>=2.3)
++  if (JANSSON_FOUND)
++      set(JANSSON_PKG libjansson)
++      include_directories(${JANSSON_INCLUDE_DIRS})
++      link_directories(${JANSSON_LIBRARY_DIRS})
++  else (JANSSON_FOUND)
++      message(FATAL_ERROR "libjansson >=2.3 not found")
++  endif (JANSSON_FOUND)
++else()
++  # added by mcqueen to get the headers into the fluent-bit build root 07OCT2020
++  include_directories(${CMAKE_BINARY_DIR}/lib/jansson/include/)
++endif()
+ 
+ add_subdirectory(src)
+ #add_subdirectory(examples)
+ #add_subdirectory(tests)
+ #add_subdirectory(docs)
+ 
+-#added mcqueen 8/16/2020 for fluent-bit compatability
+-add_dependencies(avro-static jansson)
++if(NOT FLB_USE_SYSTEM_jansson)
++  #added mcqueen 8/16/2020 for fluent-bit compatability
++  add_dependencies(avro-static jansson)
++endif()
+ 
+ add_custom_target(pretty
+     "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake_pretty.cmake")
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 0cbf3511..f1354537 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -268,11 +268,10 @@ endif()
+ 
+ # AVRO Encoding
+ if(FLB_AVRO_ENCODER)
+-set(FLB_DEPS
+-  ${FLB_DEPS}
+-  avro-static
+-  jansson
+-  )
++  set(FLB_DEPS ${FLB_DEPS} avro-static)
++  if(NOT FLB_USE_SYSTEM_jansson)
++    set(FLB_DEPS ${FLB_DEPS} jansson)
++  endif()
+ endif()
+ 
+ # Set static dependencies

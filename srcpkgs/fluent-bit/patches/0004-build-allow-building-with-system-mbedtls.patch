@@ -1,0 +1,70 @@
+From 7132a584232942e33a24a881d4269efd17436e90 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sat, 27 Feb 2021 10:33:23 +0700
+Subject: [PATCH 04/10] build: allow building with system mbedtls
+
+---
+ CMakeLists.txt     | 27 ++++++++++++++++++++++-----
+ src/CMakeLists.txt |  5 ++++-
+ 2 files changed, 26 insertions(+), 6 deletions(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index 26851122..e549b317 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -414,14 +414,31 @@ else()
+   add_subdirectory(${FLB_PATH_LIB_MONKEY}/mk_core EXCLUDE_FROM_ALL)
+ endif()
+ 
++FLB_OPTION_SYSTEM_LIB(mbedtls)
+ if(FLB_TLS)
+   FLB_DEFINITION(FLB_HAVE_TLS)
+ 
+-  # Build mbedtls: yes, in this transition period we always enable it
+-  option(ENABLE_TESTING  OFF)
+-  option(ENABLE_PROGRAMS OFF)
+-  option(INSTALL_MBEDTLS_HEADERS OFF)
+-  add_subdirectory(${FLB_PATH_LIB_MBEDTLS} EXCLUDE_FROM_ALL)
++  if(FLB_USE_SYSTEM_mbedtls)
++    check_c_source_compiles("
++      #include <mbedtls/ssl.h>
++      #include <mbedtls/x509.h>
++      int main() {
++         return 0;
++      }" FLB_HAVE_MBEDTLS)
++    find_library(FLB_MBEDTLS mbedtls)
++    find_library(FLB_MBEDCRYPTO mbedcrypto)
++    find_library(FLB_MBEDX509 mbedx509)
++    if(NOT FLB_HAVE_MBEDTLS OR NOT FLB_MBEDTLS OR NOT FLB_MBEDCRYPTO OR NOT FLB_MBEDX509)
++      message(FATAL_ERROR "mbedtls: not found")
++    endif()
++    link_libraries(${FLB_MBEDTLS} ${FLB_MBEDCRYPTO} ${FLB_MBEDX509})
++  else()
++    # Build mbedtls: yes, in this transition period we always enable it
++    option(ENABLE_TESTING  OFF)
++    option(ENABLE_PROGRAMS OFF)
++    option(INSTALL_MBEDTLS_HEADERS OFF)
++    add_subdirectory(${FLB_PATH_LIB_MBEDTLS} EXCLUDE_FROM_ALL)
++  endif()
+ 
+   # find OpenSSL (our preferred choice now)
+   find_package(OpenSSL)
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 76940076..0cbf3511 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -288,9 +288,12 @@ set(FLB_DEPS
+   ${FLB_PLUGINS}
+   ${FLB_PROXY_PLUGINS}
+   ${extra_libs}
+-  mbedtls
+   )
+ 
++if(NOT FLB_USE_SYSTEM_mbedtls)
++  set(FLB_DEPS ${FLB_DEPS} mbedtls)
++endif()
++
+ if(OPENSSL_FOUND)
+   set(FLB_DEPS
+     ${FLB_DEPS}

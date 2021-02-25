@@ -1,0 +1,73 @@
+From 58a5d5c00e5ea3ec6d4edcc081cc9eeef5d94114 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Fri, 26 Feb 2021 08:37:39 +0700
+Subject: [PATCH 01/10] build: prepare to allow using system libraries
+
+In later changes, we will allow fluent-bit to build and link against
+system libraries. Let's make a macro to ease the transition.
+
+We will keep the old default of build and link against bundled libraries
+by default, except when either:
+
+- FLB_USE_SYSTEM_LIBRARIES; or
+- FLB_USE_SYSTEM_<lib-name>
+
+is ON
+---
+ CMakeLists.txt     |  1 +
+ cmake/macros.cmake | 32 ++++++++++++++++++++++++++++++++
+ 2 files changed, 33 insertions(+)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index 26d812db..0acb1a43 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -65,6 +65,7 @@ option(FLB_DEBUG               "Build with debug symbols"     Yes)
+ option(FLB_RELEASE             "Build with debug symbols"      No)
+ option(FLB_SMALL               "Optimise for small size"       No)
+ option(FLB_COVERAGE            "Build with code-coverage"      No)
++option(FLB_USE_SYSTEM_LIBRARIES "Build with system libraries"  No)
+ option(FLB_JEMALLOC            "Build with Jemalloc support"   No)
+ option(FLB_REGEX               "Build with Regex support"     Yes)
+ option(FLB_UTF8_ENCODER        "Build with UTF8 encoding support" Yes)
+diff --git cmake/macros.cmake cmake/macros.cmake
+index 2831a07d..66bda849 100644
+--- cmake/macros.cmake
++++ cmake/macros.cmake
+@@ -8,3 +8,35 @@ endmacro()
+ macro(FLB_OPTION option value)
+   set(${option} ${value} CACHE INTERNAL "" FORCE)
+ endmacro()
++
++macro(FLB_OPTION_SYSTEM_LIB lib)
++  if(DEFINED FLB_USE_SYSTEM_${lib})
++    if(FLB_USE_SYSTEM_${lib})
++      set(FLB_USE_SYSTEM_${lib} ON)
++    else()
++      set(FLB_USE_SYSTEM_${lib} OFF)
++    endif()
++  elseif(DEFINED FLB_USE_SYSTEM_LIBRARIES)
++    set(FLB_USE_SYSTEM_${lib} "${FLB_USE_SYSTEM_LIBRARIES}")
++  else()
++    set(FLB_USE_SYSTEM_${lib} OFF)
++  endif()
++endmacro()
++
++macro(FLB_FORCE_PKG_CONFIG_LIB lib)
++  find_package(PkgConfig REQUIRED)
++  string(REPLACE "-" "_" _flb_pc_lib ${lib})
++  pkg_check_modules(${_flb_pc_lib} REQUIRED ${lib})
++  add_library(lib${_flb_pc_lib} INTERFACE IMPORTED GLOBAL)
++  set_target_properties(lib${_flb_pc_lib}
++    PROPERTIES IMPORTED_LOCATION
++    ${${_flb_pc_lib}_LIBRARIES})
++  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${${_flb_pc_lib}_CFLAGS}")
++  include_directories(${${_flb_pc_lib}_INCLUDE_DIRS})
++  foreach(_flb_pc_ldflags IN LISTS ${${_flb_pc_lib}_LDFLAGS})
++    list(APPEND CMAKE_EXE_LINKER_FLAGS ${_flb_pc_ldflags})
++  endforeach()
++  unset(_ldflags)
++  link_libraries(${${_flb_pc_lib}_LIBRARIES})
++  unset(_flb_pc_lib)
++endmacro()

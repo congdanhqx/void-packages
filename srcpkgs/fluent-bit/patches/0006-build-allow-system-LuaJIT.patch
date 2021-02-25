@@ -1,0 +1,29 @@
+From c99374bf93f16196ecaf2abb33a13a238f53d8c0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sat, 27 Feb 2021 11:28:37 +0700
+Subject: [PATCH 06/10] build: allow system LuaJIT
+
+---
+ CMakeLists.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index d4b4a0a5..999591cf 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -693,8 +693,13 @@ endif()
+ 
+ # LuaJIT (Scripting Support)
+ # ==========================
++FLB_OPTION_SYSTEM_LIB(LuaJIT)
+ if(FLB_LUAJIT)
+-  include(cmake/luajit.cmake)
++  if(FLB_USE_SYSTEM_LuaJIT)
++    FLB_FORCE_PKG_CONFIG_LIB(luajit)
++  else()
++    include(cmake/luajit.cmake)
++  endif()
+   FLB_DEFINITION(FLB_HAVE_LUAJIT)
+ endif()
+ 

@@ -1,0 +1,54 @@
+From c41ce65161a6617f0289604b04869252ccb3a8e2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sat, 27 Feb 2021 08:33:03 +0700
+Subject: [PATCH 02/10] build: allow building with system jemalloc
+
+---
+ CMakeLists.txt | 29 +++++++++++++++++------------
+ 1 file changed, 17 insertions(+), 12 deletions(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index 0acb1a43..93833e83 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -604,22 +604,27 @@ endif()
+ 
+ # Memory Allocator
+ # ================
++FLB_OPTION_SYSTEM_LIB(jemalloc)
+ if(FLB_JEMALLOC AND ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+   FLB_DEFINITION(FLB_HAVE_JEMALLOC)
+   FLB_DEFINITION(JEMALLOC_MANGLE)
+ 
+-  # Link to Jemalloc as an external dependency
+-  ExternalProject_Add(jemalloc
+-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/jemalloc-5.2.1
+-    CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lib/jemalloc-5.2.1/configure ${AUTOCONF_HOST_OPT} --with-lg-quantum=3 --prefix=<INSTALL_DIR>
+-    CFLAGS=-std=gnu99\ -Wall\ -pipe\ -g3\ -O3\ -funroll-loops
+-    BUILD_COMMAND $(MAKE)
+-    INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/
+-    INSTALL_COMMAND $(MAKE) install_lib_static install_include)
+-  add_library(libjemalloc STATIC IMPORTED GLOBAL)
+-  set_target_properties(libjemalloc PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/lib/libjemalloc_pic.a")
+-  add_dependencies(libjemalloc jemalloc)
+-  include_directories("${CMAKE_BINARY_DIR}/include/")
++  if(FLB_USE_SYSTEM_jemalloc)
++    FLB_FORCE_PKG_CONFIG_LIB(jemalloc)
++  else()
++    # Link to Jemalloc as an external dependency
++    ExternalProject_Add(jemalloc
++      SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/jemalloc-5.2.1
++      CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lib/jemalloc-5.2.1/configure ${AUTOCONF_HOST_OPT} --with-lg-quantum=3 --prefix=<INSTALL_DIR>
++      CFLAGS=-std=gnu99\ -Wall\ -pipe\ -g3\ -O3\ -funroll-loops
++      BUILD_COMMAND $(MAKE)
++      INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/
++      INSTALL_COMMAND $(MAKE) install_lib_static install_include)
++    add_library(libjemalloc STATIC IMPORTED GLOBAL)
++    set_target_properties(libjemalloc PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/lib/libjemalloc_pic.a")
++    add_dependencies(libjemalloc jemalloc)
++    include_directories("${CMAKE_BINARY_DIR}/include/")
++  endif()
+ else()
+   FLB_OPTION(FLB_JEMALLOC OFF)
+ endif()

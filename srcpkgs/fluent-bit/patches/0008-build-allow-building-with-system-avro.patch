@@ -1,0 +1,71 @@
+From 77ae366bf51bf4196193119bee7b8c610bde5f60 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sun, 28 Feb 2021 21:39:23 +0700
+Subject: [PATCH 08/10] build: allow building with system avro
+
+---
+ CMakeLists.txt     | 27 ++++++++++++++++-----------
+ src/CMakeLists.txt |  8 +++++---
+ 2 files changed, 21 insertions(+), 14 deletions(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index c920e108..f84922e7 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -364,20 +364,25 @@ add_subdirectory(${FLB_PATH_LIB_MINIZ} EXCLUDE_FROM_ALL)
+ 
+ # Avro
+ FLB_OPTION_SYSTEM_LIB(jansson)
++FLB_OPTION_SYSTEM_LIB(avro)
+ if(FLB_AVRO_ENCODER)
+-  # jansson
+-  if(FLB_USE_SYSTEM_jansson)
+-    FLB_FORCE_PKG_CONFIG_LIB(jansson)
++  if(FLB_USE_SYSTEM_avro)
++    FLB_FORCE_PKG_CONFIG_LIB(avro-c)
+   else()
+-    option(JANSSON_BUILD_DOCS         OFF)
+-    option(JANSSON_EXAMPLES           OFF)
+-    option(JANSSON_WITHOUT_TESTS       ON)
+-    option(JANSSON_BUILD_SHARED_LIBS  OFF)
+-    add_subdirectory(${FLB_PATH_LIB_JANSSON})
+-  endif()
++    # jansson
++    if(FLB_USE_SYSTEM_jansson)
++      FLB_FORCE_PKG_CONFIG_LIB(jansson)
++    else()
++      option(JANSSON_BUILD_DOCS         OFF)
++      option(JANSSON_EXAMPLES           OFF)
++      option(JANSSON_WITHOUT_TESTS       ON)
++      option(JANSSON_BUILD_SHARED_LIBS  OFF)
++      add_subdirectory(${FLB_PATH_LIB_JANSSON})
++    endif()
+ 
+-  #avro
+-  add_subdirectory(${FLB_PATH_LIB_AVRO} EXCLUDE_FROM_ALL)
++    #avro
++    add_subdirectory(${FLB_PATH_LIB_AVRO} EXCLUDE_FROM_ALL)
++  endif()
+ endif()
+ 
+ # tutf8e
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index f1354537..37640df3 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -268,9 +268,11 @@ endif()
+ 
+ # AVRO Encoding
+ if(FLB_AVRO_ENCODER)
+-  set(FLB_DEPS ${FLB_DEPS} avro-static)
+-  if(NOT FLB_USE_SYSTEM_jansson)
+-    set(FLB_DEPS ${FLB_DEPS} jansson)
++  if(NOT FLB_USE_SYSTEM_avro)
++    set(FLB_DEPS ${FLB_DEPS} avro-static)
++    if(NOT FLB_USE_SYSTEM_jansson)
++      set(FLB_DEPS ${FLB_DEPS} jansson)
++    endif()
+   endif()
+ endif()
+ 

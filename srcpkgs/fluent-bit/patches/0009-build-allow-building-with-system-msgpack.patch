@@ -1,0 +1,75 @@
+From 534d70fc228c01e9cdcb74f124edcf1ca949e4f8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sun, 28 Feb 2021 21:51:26 +0700
+Subject: [PATCH 09/10] build: allow building with system msgpack
+
+---
+ CMakeLists.txt         | 15 ++++++++++-----
+ plugins/CMakeLists.txt |  6 +++++-
+ src/CMakeLists.txt     |  9 ++++++++-
+ 3 files changed, 23 insertions(+), 7 deletions(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index f84922e7..ab9bfe93 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -350,11 +350,16 @@ endif()
+ set(WITH_SYSTEM_MALLOC  1 CACHE BOOL "Use system memory allocator")
+ 
+ # MsgPack options
+-option(MSGPACK_ENABLE_CXX             OFF)
+-option(MSGPACK_ENABLE_SHARED          OFF)
+-option(MSGPACK_BUILD_TESTS            OFF)
+-option(MSGPACK_BUILD_EXAMPLES         OFF)
+-add_subdirectory(${FLB_PATH_LIB_MSGPACK} EXCLUDE_FROM_ALL)
++FLB_OPTION_SYSTEM_LIB(msgpack)
++if(FLB_USE_SYSTEM_msgpack)
++  FLB_FORCE_PKG_CONFIG_LIB(msgpack)
++else()
++  option(MSGPACK_ENABLE_CXX             OFF)
++  option(MSGPACK_ENABLE_SHARED          OFF)
++  option(MSGPACK_BUILD_TESTS            OFF)
++  option(MSGPACK_BUILD_EXAMPLES         OFF)
++  add_subdirectory(${FLB_PATH_LIB_MSGPACK} EXCLUDE_FROM_ALL)
++endif()
+ 
+ # MPack
+ add_subdirectory(${FLB_PATH_LIB_MPACK} EXCLUDE_FROM_ALL)
+diff --git plugins/CMakeLists.txt plugins/CMakeLists.txt
+index 6034a54b..c38b44c2 100644
+--- plugins/CMakeLists.txt
++++ plugins/CMakeLists.txt
+@@ -110,7 +110,11 @@ endmacro()
+ macro(FLB_PLUGIN name src deps)
+   add_library(flb-plugin-${name} STATIC ${src})
+   add_sanitizers(flb-plugin-${name})
+-  target_link_libraries(flb-plugin-${name} fluent-bit-static msgpack-c-static ${deps})
++  target_link_libraries(flb-plugin-${name} fluent-bit-static)
++  if (NOT FLB_USE_SYSTEM_msgpack)
++    target_link_libraries(flb-plugin-${name} msgpack-c-static)
++  endif()
++  target_link_libraries(flb-plugin-${name} ${deps})
+ endmacro()
+ 
+ 
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 37640df3..4b67515b 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -281,7 +281,14 @@ set(FLB_DEPS
+   ${FLB_DEPS}
+   mk_core
+   jsmn
+-  msgpack-c-static
++  )
++
++if(NOT FLB_USE_SYSTEM_msgpack)
++  set(FLB_DEPS ${FLB_DEPS} msgpack-c-static)
++endif()
++
++set(FLB_DEPS
++  ${FLB_DEPS}
+   mpack-static
+   chunkio-static
+   miniz

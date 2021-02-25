@@ -1,0 +1,30 @@
+From 9cab5de393b45f77d07c86c0bebdb5f694b2396c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sat, 27 Feb 2021 10:41:09 +0700
+Subject: [PATCH 05/10] build: allow building with system sqlite3
+
+---
+ CMakeLists.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index e549b317..d4b4a0a5 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -462,9 +462,14 @@ if (FLB_SIGNV4)
+   FLB_DEFINITION(FLB_HAVE_SIGNV4)
+ endif()
+ 
++FLB_OPTION_SYSTEM_LIB(sqlite3)
+ if(FLB_SQLDB)
+   FLB_DEFINITION(FLB_HAVE_SQLDB)
+-  add_subdirectory(${FLB_PATH_LIB_SQLITE})
++  if(FLB_USE_SYSTEM_sqlite3)
++    FLB_FORCE_PKG_CONFIG_LIB(sqlite3)
++  else()
++    add_subdirectory(${FLB_PATH_LIB_SQLITE})
++  endif()
+ endif()
+ 
+ if(FLB_TRACE)

@@ -1,0 +1,47 @@
+From 5f901d44ad8e243045a7a13b86e255855f50b094 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sun, 28 Feb 2021 22:16:35 +0700
+Subject: [PATCH 10/10] build: allow building with system xxHash
+
+---
+ CMakeLists.txt | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index ab9bfe93..692c7ee0 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -47,6 +47,7 @@ endif()
+ 
+ include(GNUInstallDirs)
+ include(ExternalProject)
++include(CheckIncludeFile)
+ include(cmake/FindJournald.cmake)
+ include(cmake/FindMonkey.cmake)
+ include(cmake/macros.cmake)
+@@ -396,10 +397,20 @@ if(FLB_UTF8_ENCODER)
+ endif()
+ 
+ # xxHash
+-FLB_OPTION(BUILD_SHARED_LIBS "Build shared libs" OFF)
+-set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
+-set(XXHASH_BUILD_XXHSUM OFF)
+-add_subdirectory(${FLB_PATH_LIB_XXHASH}/cmake_unofficial EXCLUDE_FROM_ALL)
++FLB_OPTION_SYSTEM_LIB(xxHash)
++if(FLB_USE_SYSTEM_xxHash)
++  check_include_file("xxhash.h" FLB_HAVE_XXHASH_H)
++  find_library(FLB_XXHASH_LIB xxhash)
++  if(NOT FLB_HAVE_XXHASH_H OR NOT FLB_XXHASH_LIB)
++    message(FATAL_ERROR "xxHash: development files not found")
++  endif()
++  link_libraries(${FLB_XXHASH_LIB})
++else()
++  FLB_OPTION(BUILD_SHARED_LIBS "Build shared libs" OFF)
++  set(XXHASH_BUILD_ENABLE_INLINE_API OFF)
++  set(XXHASH_BUILD_XXHSUM OFF)
++  add_subdirectory(${FLB_PATH_LIB_XXHASH}/cmake_unofficial EXCLUDE_FROM_ALL)
++endif()
+ 
+ # Chunk I/O
+ FLB_OPTION(CIO_LIB_STATIC  ON)

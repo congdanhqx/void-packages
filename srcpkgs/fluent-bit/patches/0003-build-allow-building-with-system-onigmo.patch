@@ -1,0 +1,29 @@
+From f1c972ed4ce26b55e89268540f39b7323bb96352 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C4=90o=C3=A0n=20Tr=E1=BA=A7n=20C=C3=B4ng=20Danh?=
+ <congdanhqx@gmail.com>
+Date: Sat, 27 Feb 2021 09:42:54 +0700
+Subject: [PATCH 03/10] build: allow building with system onigmo
+
+---
+ CMakeLists.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git CMakeLists.txt CMakeLists.txt
+index 93833e83..26851122 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -647,8 +647,13 @@ endif()
+ 
+ # Onigmo (Regex Engine)
+ # =====================
++FLB_OPTION_SYSTEM_LIB(onigmo)
+ if(FLB_REGEX)
+-  include(cmake/onigmo.cmake)
++  if(NOT FLB_USE_SYSTEM_onigmo)
++    include(cmake/onigmo.cmake)
++  else()
++    FLB_FORCE_PKG_CONFIG_LIB(onigmo)
++  endif()
+   FLB_DEFINITION(FLB_HAVE_REGEX)
+ endif()
+ 
