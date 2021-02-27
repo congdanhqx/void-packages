@@ -1,0 +1,27 @@
+# Template file for 'onigmo'
+pkgname=onigmo
+version=6.2.0
+revision=1
+build_style=gnu-configure
+short_desc="Regular expressions library forked from Oniguruma"
+maintainer="Đoàn Trần Công Danh <congdanhqx@gmail.com>"
+license="BSD-2-Clause"
+homepage="https://github.com/k-takata/Onigmo"
+distfiles="https://github.com/k-takata/Onigmo/releases/download/Onigmo-$version/onigmo-$version.tar.gz"
+checksum=c648496b5339953b925ebf44b8de356feda8d3428fa07dc1db95bfe2570feb76
+
+post_install() {
+	vlicense COPYING
+}
+
+onigmo-devel_package() {
+	short_desc+=" - development files"
+	depends="onigmo>=${version}_${revision}"
+	pkg_install() {
+		vmove usr/bin
+		vmove usr/include
+		vmove usr/lib/pkgconfig
+		vmove "usr/lib/*.a"
+		vmove "usr/lib/*.so"
+	}
+}
