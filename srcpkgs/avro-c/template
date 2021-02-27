@@ -1,0 +1,33 @@
+# Template file for 'avro'
+pkgname=avro-c
+version=1.10.1
+revision=1
+build_style=cmake
+configure_args="-DCMAKE_BUILD_TYPE=None"
+hostmakedepends="pkg-config asciidoc source-highlight"
+makedepends="jansson-devel zlib-devel liblzma-devel snappy-devel"
+short_desc="Apache's data serialization system"
+maintainer="Đoàn Trần Công Danh <congdanhqx@gmail.com>"
+license="Apache-2.0"
+homepage="http://avro.apache.org/"
+distfiles="http://archive.apache.org/dist/avro/stable/c/avro-c-$version.tar.gz"
+checksum=5313dcb6d240b919f218a80a8b9b58f7a3eb501ff177b0dedc1c0595d0ee916d
+
+libavro_package() {
+	short_desc+=" - libraries"
+	pkg_install() {
+		vmove "usr/lib/*.so.*"
+	}
+}
+
+libavro-devel_package() {
+	short_desc+=" - development files"
+	depends="libavro>=${version}_${revision} ${makedepends}"
+	pkg_install() {
+		vmove usr/include
+		vmove "usr/lib/*.a"
+		vmove "usr/lib/*.so"
+		vmove usr/lib/pkgconfig
+		vmove usr/share
+	}
+}
