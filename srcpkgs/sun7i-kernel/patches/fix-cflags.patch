@@ -1,0 +1,12 @@
+Index: linux-sunxi-d47d367036be38c5180632ec8a3ad169a4593a88/arch/arm/mach-sun7i/pm/standby/Makefile
+===================================================================
+--- linux-sunxi-d47d367036be38c5180632ec8a3ad169a4593a88/arch/arm/mach-sun7i/pm/standby/Makefile.orig
++++ linux-sunxi-d47d367036be38c5180632ec8a3ad169a4593a88/arch/arm/mach-sun7i/pm/standby/Makefile
+@@ -15,6 +15,7 @@ LD_FILE = standby.xn
+ KBUILD_CFLAGS := $(LINUXINCLUDE) -I$(srctree)/arch/arm/mach-sun7i/pm -Os -g -c
+ KBUILD_CFLAGS += -nostdlib -march=armv7-a -marm -mlittle-endian -D__STANDBY_MODULE__
+ KBUILD_CFLAGS += -fno-unwind-tables -fno-asynchronous-unwind-tables
++KBUILD_CFLAGS += -fno-builtin-memset -fno-tree-loop-distribute-patterns
+ KBUILD_AFLAGS := $(KBUILD_CFLAGS) -D__ASSEMBLY__
+ 
+ LDFLAGS_standby.elf := -T
